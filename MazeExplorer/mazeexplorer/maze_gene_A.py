@@ -12,12 +12,18 @@ WALL_TYPE = np.int8
 WALL = 0
 EMPTY = 1
 
+"""
+TODOs: 
+    1. Direction of each corner: X and Y, which way to go? how much ways to go? 
+    2. make the 
+"""
+
 class WallNode:
-    def __init__(self, x, y, parent = None, height = 0):
+    def __init__(self, x, y, parent = None, height = 1):
         self.x = x
         self.y = y
-        self.dx = 0
-        self.dy = 0
+        self.dx = -1
+        self.dy = -1
         self.height = height
         self.parent = parent
         
@@ -38,28 +44,38 @@ class WallNode:
           rat: the possibility to change the height of the wall. 
           
           return: child node. 
-         """
-        
-        self.dx = random.randint(self.x, columns)
-        self.dy = random.randint(self.y, rows)
-        #print("dx, dy: ", self.dx, self.dy)
-        #print(self.show_node())
-        if X != False: 
+        """
+        n, m = None, None
+        #print("Which one to generate? ", X, Y)
+        if X: 
+            self.dy = random.randint(0, rows)
+            #yp = min(self.y+self.dy, rows)
             n = WallNode(self.x, self.dy, self, self.height)
             if random.random() < rat:
                 n.height = random.randint(0, 10)
-        if Y != False: 
+            #print("Child Node X: ", n.show_node())
+            
+        if Y: 
+            self.dx = random.randint(0, columns)
+            #xp = min(self.x+self.dx, columns)
             m = WallNode (self.dx, self.y, self, self.height)
             if random.random() < rat:
                 m.height = random.randint(0, 10)
-        return n, m
+            #print("Child Node Y: ", m.show_node())
+        
+        #print("dx, dy: ", self.dx, self.dy)
+        #print("Parent Node: ", self.show_node())
+        #print("Child Nodes: ", n.show_node(), m.show_node())
+        
+        
+        return [n, m]
   
     def rec_generator(self, maze, rows, columns, X = False, Y = False, rat = 0):
         """
         TODO: Try recursive function. 
         """
-        
         return 
+
 
 def original_node(rows = 0, columns = 0, h = 1):
     x = random.randint(0, columns)
@@ -75,8 +91,8 @@ def generate_maze_A (rows=20, columns=20, numOfNodes=20):
     TODO: 
         1. Count is now counting the nodes of the corner. 
             need to be change to the number of total walls. 
-        2. Last point should be the original node. 
-        
+        2. Last point should be the original node, 
+            or last two points should be connected. 
     """
     
     maze = list()
@@ -100,15 +116,45 @@ def generate_maze_A (rows=20, columns=20, numOfNodes=20):
 
 
 
-def rec_maze_A(node=None, maze=[],  rows=20, columns=20, numOfNodes=20): 
+def rec_maze_A(node, maze,  rows=20, columns=20, numOfNodes=20, prob = 0.5): 
+    child1, child2 = None, None
+    
     #Start of the process. 
     if node == None: 
-        node = original_node(rows, columns)
-        
-    #print(node.show_node())
-    maze.append(node.show_node())
-    if len(maze) > numOfNodes: 
-        return maze
+        #node = original_node(rows, columns)
+        #node = WallNode(0, 0)
+        return
     
-    child1, child2 = node.find_child(rows, columns, X = True, Y = True, rat = 0.1)
-    return rec_maze_A(child1, maze, rows, columns, numOfNodes) and rec_maze_A(child2, maze, rows, columns, numOfNodes)
+    maze.append(node)
+    #print(maze)
+    
+    #print(node.show_node())
+    #End of the process
+    if len(maze) > numOfNodes:
+        return 
+    
+    if random.random() < prob: 
+        child1 = node.find_child(rows, columns, X = True, rat = 0.1)[0]
+        print("         Child1 generated!!!")
+        rec_maze_A(child1, maze, rows, columns, numOfNodes)
+       
+    if random.random() < prob: 
+        child2 = node.find_child(rows, columns, Y = True, rat = 0.1)[1]
+        print("         Child2 generated!!!")
+        rec_maze_A(child2, maze, rows, columns, numOfNodes)
+        
+        
+    #child1, child2 = node.find_child(rows, columns, X = True, Y = True, rat = 0.1)
+    
+    ##PROBLEM: Only returns child1 result. 
+    #return rec_maze_A(child1, maze, rows, columns, numOfNodes) and rec_maze_A(child2, maze, rows, columns, numOfNodes)
+    ##OR
+    # if child1 and child2: 
+    #     return rec_maze_A(child1, maze, rows, columns, numOfNodes) and rec_maze_A(child2, maze, rows, columns, numOfNodes)
+    # else: 
+    #     return rec_maze_A(child1, maze, rows, columns, numOfNodes) or rec_maze_A(child2, maze, rows, columns, numOfNodes)
+    ##OR
+    # if child1 != [None]: 
+    #     rec_maze_A(child1, maze, rows, columns, numOfNodes)
+    # if child2 != [None]: 
+    #     rec_maze_A(child2, maze, rows, columns, numOfNodes)
