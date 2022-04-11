@@ -49,6 +49,7 @@ class WallNode:
         #print("Which one to generate? ", X, Y)
         if X: 
             self.dy = random.randint(0, rows)
+            #self.dy = random.randint(max(0, self.y-3), min(self.y+3, rows))
             #yp = min(self.y+self.dy, rows)
             n = WallNode(self.x, self.dy, self, self.height)
             if random.random() < rat:
@@ -57,6 +58,7 @@ class WallNode:
             
         if Y: 
             self.dx = random.randint(0, columns)
+            #self.dx = random.randint(max(0, self.x-3), min(self.x+3, rows))
             #xp = min(self.x+self.dx, columns)
             m = WallNode (self.dx, self.y, self, self.height)
             if random.random() < rat:
@@ -116,7 +118,7 @@ def generate_maze_A (rows=20, columns=20, numOfNodes=20):
 
 
 
-def rec_maze_A(node, maze,  rows=20, columns=20, numOfNodes=20, prob = 0.5): 
+def rec_maze_A(node, maze,  rows=20, columns=20, numOfNodes=20, prob = 0.7): 
     child1, child2 = None, None
     
     #Start of the process. 
@@ -135,18 +137,17 @@ def rec_maze_A(node, maze,  rows=20, columns=20, numOfNodes=20, prob = 0.5):
     
     if random.random() < prob: 
         child1 = node.find_child(rows, columns, X = True, rat = 0.1)[0]
-        print("         Child1 generated!!!")
+        #print("         Child1 generated!!!")
         rec_maze_A(child1, maze, rows, columns, numOfNodes)
        
     if random.random() < prob: 
         child2 = node.find_child(rows, columns, Y = True, rat = 0.1)[1]
-        print("         Child2 generated!!!")
+        #print("         Child2 generated!!!")
         rec_maze_A(child2, maze, rows, columns, numOfNodes)
         
         
     #child1, child2 = node.find_child(rows, columns, X = True, Y = True, rat = 0.1)
     
-    ##PROBLEM: Only returns child1 result. 
     #return rec_maze_A(child1, maze, rows, columns, numOfNodes) and rec_maze_A(child2, maze, rows, columns, numOfNodes)
     ##OR
     # if child1 and child2: 

@@ -25,6 +25,6 @@ rec_maze_A(node, maze)
 # for m in test_maze: 
 #     print(m.show_node())
 
-print('maze', maze)
+#print('maze', maze)
 mp = getMap(maze, 21, 21)
 printMap(mp)
