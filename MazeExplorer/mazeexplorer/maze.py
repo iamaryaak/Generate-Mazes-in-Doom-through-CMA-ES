@@ -151,7 +151,7 @@ def generate_mazes(maze_id, num, rows=9, columns=9, seed=None, complexity=.7, de
 
     if seed:
         random.seed(seed)
-    print("Number of Maps: ", num)
+
     while len(mazes) < num:
         if counter > 5:
             raise ValueError('Unable to create the desired number of unique maps')
@@ -160,8 +160,7 @@ def generate_mazes(maze_id, num, rows=9, columns=9, seed=None, complexity=.7, de
 
         # maze = Maze.create_maze(columns + 1, rows + 1, map_seed, complexity=complexity, density=density)
         # print(maze)
-        maze = Maze.get_maze("/home/arya/Documents/Projects/MazeExplorer/my_maze_inputs/my_maze1.txt")
-        
+        maze = Maze.get_maze("/Users/aryakulkarni/Downloads/MazeExplorer/my_maze_inputs/testMap2.txt")
 
         if maze in mazes:
             counter += 1

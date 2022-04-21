@@ -16,12 +16,12 @@ global int 5:reward_check;
 
 int number_keys = 9;
 bool random_spawn = False;
-bool random_textures = True;
+bool random_textures = False;
 bool random_keys = False;
 int xmin = 48.0;
 int ymin = 48.0;
-int xmax = 1968.0;
-int ymax = 1968.0;
+int xmax = 1200.0;
+int ymax = 1200.0;
 int offset = 48.0;
 
 str floor_texture = "CEIL5_2";
