@@ -84,6 +84,9 @@ def build_wall(maze, BLOCK_SIZE):
             if (w, h + 1) in v_indexes:
                 __add_line((w, h), (w, h + 1))
 
+            if (w + 1, h + 1) in v_indexes:
+                __add_line((w, h), (w + 1, h + 1))
+
     return things, vertexes, linedefs
 
 

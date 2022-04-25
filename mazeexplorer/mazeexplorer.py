@@ -23,7 +23,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class MazeExplorer(VizDoom):
     def __init__(self, unique_maps=False, number_maps=1, keys=9, size=(10, 10), random_spawn=False, random_textures=False,
                  random_key_positions=False, seed=None, clip=(-1, 1),
-                 floor_texture="CEIL5_2", ceilling_texture="CEIL5_1", wall_texture="STONE2",
+                 floor_texture="CEIL5_2", ceilling_texture="CEIL5_1", wall_texture="RROCK11",
                  action_frame_repeat=4, actions="MOVE_FORWARD TURN_LEFT TURN_RIGHT", scaled_resolution=(42, 42),
                  episode_timeout=1500, complexity=.7, density=.7, data_augmentation=False, mazes_path=None):
         """
@@ -79,7 +79,7 @@ class MazeExplorer(VizDoom):
         self.floor_texture = floor_texture
         self.ceilling_texture = ceilling_texture
 
-        self.mazes_path = "/home/arya/Documents/Projects/MazeExplorer/mazeexplorer/outputs" #mazes_path if mazes_path is not None else tempfile.mkdtemp()
+        self.mazes_path = "/Users/aryakulkarni/Downloads/MazeExplorer/maze_outputs" #mazes_path if mazes_path is not None else tempfile.mkdtemp()
         # create new maps and corresponding config
         shutil.rmtree(self.mazes_path, ignore_errors=True)
         os.mkdir(self.mazes_path)

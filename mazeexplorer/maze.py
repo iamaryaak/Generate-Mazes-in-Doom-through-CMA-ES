@@ -63,6 +63,8 @@ class Maze:
         rows = (rows // 2) * 2 + 1
         columns = (columns // 2) * 2 + 1
 
+        directions = []
+
         if seed is not None:
             np.random.seed(seed)
 
@@ -84,20 +86,44 @@ class Maze:
 
                 if maze.in_maze(x - 2, y):
                     neighbours.append((x - 2, y))
+                    print("L")
 
                 if maze.in_maze(x + 2, y):
                     neighbours.append((x + 2, y))
+                    print("R")
+
 
                 if maze.in_maze(x, y - 2):
                     neighbours.append((x, y - 2))
+                    print("U")
+
 
                 if maze.in_maze(x, y + 2):
                     neighbours.append((x, y + 2))
+                    print("D")
+
+
+                if maze.in_maze(x + 2, y + 2):
+                    neighbours.append((x + 2, y + 2))
+                    print("UR")
+
+                if maze.in_maze(x - 2, y - 2):
+                    neighbours.append((x - 2, y - 2))
+                    print("LD")
+
+                if maze.in_maze(x - 2, y + 2):
+                    neighbours.append((x - 2, y + 2))
+                    print("LR")
+
+                if maze.in_maze(x + 2, y - 2):
+                    neighbours.append((x + 2, y - 2))
+                    print("UD")
 
                 if len(neighbours):
                     next_x, next_y = neighbours[np.random.randint(
                         0,
                         len(neighbours) - 1)]
+                    #print("next X: ", next_x, " next Y: ", next_y)
 
                     if not maze.is_wall(next_x, next_y):
                         maze.set_wall(next_x, next_y)
@@ -106,7 +132,6 @@ class Maze:
                         x, y = next_x, next_y
 
         return maze
-        
 
     @staticmethod
     def get_maze(path_to_maze):
@@ -152,17 +177,16 @@ def generate_mazes(maze_id, num, rows=9, columns=9, seed=None, complexity=.7, de
 
     if seed:
         random.seed(seed)
-    print("Number of Maps: ", num)
+
     while len(mazes) < num:
         if counter > 5:
             raise ValueError('Unable to create the desired number of unique maps')
 
         map_seed = random.randint(0, 2147483647)
 
-        # maze = Maze.create_maze(columns + 1, rows + 1, map_seed, complexity=complexity, density=density)
-        # print(maze)
-        maze = Maze.get_maze("/home/arya/Documents/Projects/MazeExplorer/my_maze_inputs/my_maze1.txt")
-        
+        maze = Maze.create_maze(columns + 1, rows + 1, map_seed, complexity=complexity, density=density)
+        print(maze)
+        #maze = Maze.get_maze("/Users/aryakulkarni/Downloads/MazeExplorer/my_maze_inputs/testMap2.txt")
 
         if maze in mazes:
             counter += 1
