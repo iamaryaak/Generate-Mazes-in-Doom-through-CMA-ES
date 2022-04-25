@@ -1,0 +1,168 @@
+#include "zcommon.acs"
+
+#define TARGET_ID_START 1000
+#define GOAL_TID 999
+
+int TARGET_ID_END = TARGET_ID_START;
+
+int target_id = 10;
+
+global int 0:reward;
+global int 1:goal_x;
+global int 2:goal_y;
+global int 3:goal_z;
+global int 4:map_level;
+global int 5:reward_check;
+
+int number_keys = 9;
+bool random_spawn = False;
+bool random_textures = False;
+bool random_keys = False;
+int xmin = 48.0;
+int ymin = 48.0;
+int xmax = 1200.0;
+int ymax = 1200.0;
+int offset = 48.0;
+
+str floor_texture = "CEIL5_2";
+str ceilling_texture = "CEIL5_1";
+str wall_texture = "STONE2";
+
+int SPAWN_LOC_ID = 0;
+
+int keys_spawn[ 9 ] = { 0.6394, 0.0250, 0.2750, 0.2232, 0.7365, 0.6767, 0.8922, 0.0869, 0.4219 };
+
+int keys_spawn_offset_x[ 9 ] = { -45.000, -37.000, -21.000, -19.000, 16.000, 29.000, -45.000, 23.000, -23.000 };
+int keys_spawn_offset_y[ 9 ] = { 43.000, 35.000, 41.000, 21.000, 5.000, -20.000, 9.000, 27.000, -13.000 };
+
+int spawns[ 1 ] = { 0.8094 };
+int spawns_offset_x[ 1 ] = { -48.000 };
+int spawns_offset_y[ 1 ] = { -28.000 };
+int spawns_angle[ 1 ] = { 0.70 };
+
+str texturesToRandomize[246] = {"ASHWALL2", "ASHWALL3", "ASHWALL4", "ASHWALL6", "ASHWALL7", "BFALL1", "BFALL2", "BFALL3", "BFALL4", "BIGBRIK1", "BIGBRIK2", "BIGBRIK3", "BIGDOOR2", "BIGDOOR3", "BIGDOOR4", "BIGDOOR5", "BLAKWAL1", "BLAKWAL2", "BRICK1", "BRICK2", "BRICK3", "BRICK4", "BRICK5", "BRICK6", "BRICK7", "BRICK8", "BRICK9", "BRICK10", "BRICK11", "BRICK12", "BRICKLIT", "BRONZE1", "BRONZE2", "BRONZE3", "BRONZE4", "BROVINE2", "BROWN1", "BROWN144", "BROWN96", "BROWNGRN", "BROWNHUG", "BROWNPIP", "BRWINDOW", "BSTONE1", "BSTONE2", "BSTONE3", "CEMENT1", "CEMENT2", "CEMENT3", "CEMENT4", "CEMENT5", "CEMENT6", "CEMENT7", "CEMENT9", "COMPBLUE", "COMPSPAN", "COMPSTA1", "COMPSTA2", "COMPTALL", "COMPWERD", "CRACKLE2", "CRACKLE4", "CRATE1", "CRATE2", "CRATE3", "CRATELIT", "CRATWIDE", "DBRAIN1", "DBRAIN2", "DBRAIN3", "DOORBLU", "DOORRED", "DOORSTOP", "DOORTRAK", "DOORYEL", "FIREWALA", "FIREWALB", "FIREWALL", "GRAY1", "GRAY2", "GRAY4", "GRAY5", "GRAYBIG", "GRAYVINE", "GSTONE1", "GSTONE2", "GSTVINE1", "GSTVINE2", "ICKWALL1", "ICKWALL2", "ICKWALL3", "LITE3", "LITE5", "LITEBLU1", "LITEBLU4", "MARBGRAY", "MARBLE1", "MARBLE2", "MARBLE3", "MARBLOD1", "METAL", "METAL1", "METAL2", "METAL3", "METAL4", "METAL5", "METAL6", "METAL7", "MODWALL1", "MODWALL2", "MODWALL4", "NUKE24", "NUKEDGE1", "PANBOOK", "PANBORD1", "PANBORD2", "PANCASE1", "PANCASE2", "PANEL1", "PANEL2", "PANEL4", "PANEL5", "PANEL6", "PANEL7", "PANEL8", "PANEL9", "PIPE1", "PIPE2", "PIPE4", "PIPE6", "PIPEWAL1", "PIPEWAL2", "PLAT1", "REDWALL", "ROCK1", "ROCK2", "ROCK3", "ROCK4", "ROCK5", "ROCKRED1", "ROCKRED2", "SFALL1", "SFALL2", "SFALL3", "SFALL4", "SHAWN2", "SILVER1", "SILVER2", "SILVER3", "SK_LEFT", "SK_RIGHT", "SKIN2", "SLADWALL", "SP_HOT1", "SPACEW2", "SPACEW3", "SPACEW4", "SPCDOOR1", "SPCDOOR2", "SPCDOOR3", "SPCDOOR4", "STARBR2", "STARG1", "STARG2", "STARG3", "STARGR1", "STARGR2", "STARTAN2", "STARTAN3", "STEPLAD1", "STEPTOP", "STONE", "STONE2", "STONE3", "STONE4", "STONE5", "STONE6", "STONE7", "STUCCO", "STUCCO1", "SUPPORT2", "SUPPORT3", "TANROCK2", "TANROCK3", "TANROCK4", "TANROCK5", "TANROCK7", "TANROCK8", "TEKBRON1", "TEKBRON2", "TEKGREN1", "TEKGREN2", "TEKGREN3", "TEKGREN4", "TEKGREN5", "TEKLITE", "TEKLITE2", "TEKWALL1", "TEKWALL4", "TEKWALL6", "WOOD1", "WOOD3", "WOOD5", "WOOD6", "WOOD7", "WOOD8", "WOOD9", "WOOD12", "WOODMET1", "WOODVERT", "ZDOORB1", "ZDOORF1", "ZELDOOR", "ZIMMER2", "ZIMMER5", "ZIMMER7", "ZIMMER8", "ZZWOLF1", "ZZWOLF5", "ZZWOLF9", "ZZWOLF10", "ZZWOLF11", "ZZZFACE6", "ZZZFACE7", "ZZZFACE8", "ZZZFACE9"};
+
+function str GetRandomTexture(void)
+{
+		return texturesToRandomize[Random(0, 245)];
+}
+
+function void RandomTextures(void)
+{
+	ReplaceTextures("CEIL5_2", GetRandomTexture());
+    ReplaceTextures("CEIL5_1", GetRandomTexture());
+    ReplaceTextures("STONE2", GetRandomTexture());
+    Light_ChangeToValue(0, Random(150, 255));
+}
+
+function void SpawnKeyRandom(void)
+{
+    TARGET_ID_END = TARGET_ID_START;
+        while(IsTIDUsed(TARGET_ID_END + 1))
+        {
+            TARGET_ID_END += 1;
+        }
+
+    SPAWN_LOC_ID = random(TARGET_ID_START, TARGET_ID_END);
+
+    Spawn("RedCard", GetActorX(SPAWN_LOC_ID) + random(-offset, offset), GetActorY(SPAWN_LOC_ID) + random(-offset, offset),0.0,target_id,128);
+    SetThingSpecial(target_id, ACS_ExecuteAlways, 5);
+}
+
+function void SpawnKey(int i)
+{
+    TARGET_ID_END = TARGET_ID_START;
+    while(IsTIDUsed(TARGET_ID_END + 1))
+    {
+        TARGET_ID_END += 1;
+    }
+
+    int TARGET_ID_START_float = TARGET_ID_START << 16;
+    int TARGET_ID_END_float = TARGET_ID_END << 16;
+
+    int SPAWN_LOC_ID_float = FixedMul (keys_spawn[i], (TARGET_ID_END_float - TARGET_ID_START_float)) +  TARGET_ID_START_float;
+    SPAWN_LOC_ID = SPAWN_LOC_ID_float >> 16;
+
+    Spawn("RedCard", GetActorX(SPAWN_LOC_ID) + keys_spawn_offset_x[i], GetActorY(SPAWN_LOC_ID) + keys_spawn_offset_y[i], 0.0, target_id, 128);
+    SetThingSpecial(target_id, ACS_ExecuteAlways, 5);
+}
+
+script 1 OPEN
+{
+
+}
+
+script 2 ENTER
+{
+    map_level = GetLevelInfo (LEVELINFO_LEVELNUM);
+    if (random_keys)
+    {
+        for (int i=0; i<number_keys; i++)
+        {
+            SpawnKeyRandom();
+        }
+    }
+    else
+    {
+        for (int j= number_keys * map_level; j< (number_keys * (map_level + 1)); j++)
+        {
+            SpawnKey(j);
+        }
+    }
+    reward = 0.0;
+    reward_check = 0;
+
+	if (random_textures)
+    {
+        RandomTextures();
+    }
+    else
+    {
+        ReplaceTextures("CEIL5_2", floor_texture);
+        ReplaceTextures("CEIL5_1", ceilling_texture);
+        ReplaceTextures("STONE2", wall_texture);
+    }
+
+	if (random_spawn)
+    {
+
+        TARGET_ID_END = TARGET_ID_START;
+        while(IsTIDUsed(TARGET_ID_END + 1))
+        {
+            TARGET_ID_END += 1;
+        }
+
+        SPAWN_LOC_ID = random(TARGET_ID_START, TARGET_ID_END);
+
+        SetActorPosition(0, GetActorX(SPAWN_LOC_ID) + random(-offset, offset), GetActorY(SPAWN_LOC_ID) + random(-offset, offset), 0.0, 0);
+	    SetActorAngle(0,random(0.0,1.0));
+    }
+    else
+    {
+        TARGET_ID_END = TARGET_ID_START;
+        while(IsTIDUsed(TARGET_ID_END + 1))
+        {
+            TARGET_ID_END += 1;
+        }
+
+        int TARGET_ID_START_float = TARGET_ID_START << 16;
+        int TARGET_ID_END_float = TARGET_ID_END << 16;
+
+        int SPAWN_LOC_ID_float = FixedMul (spawns[map_level], (TARGET_ID_END_float - TARGET_ID_START_float)) +  TARGET_ID_START_float;
+        SPAWN_LOC_ID = SPAWN_LOC_ID_float >> 16;
+
+        SetActorPosition(0, GetActorX(SPAWN_LOC_ID) + spawns_offset_x[map_level], GetActorY(SPAWN_LOC_ID) + spawns_offset_y[map_level], 0.0, 0);
+	    SetActorAngle(0, spawns_angle[map_level]);
+    }
+}
+
+script 5 (void)
+{
+    reward = reward + 1.0;
+    reward_check = reward_check + 1;
+    if (reward_check == number_keys)
+    {
+        Exit_Normal(0);
+		restart;
+    }
+}
