@@ -27,7 +27,7 @@ shoot = [0, 0, 1]
 left = [1, 0, 0]
 right = [0, 1, 0]
 actions = [shoot, left, right]
-episodes = 50
+episodes = 1
 for i in range(episodes):
     print("Episode #" + str(i + 1))
     game.new_episode()

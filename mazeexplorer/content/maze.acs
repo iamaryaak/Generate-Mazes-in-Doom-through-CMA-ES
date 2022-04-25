@@ -26,7 +26,7 @@ int offset = 48.0;
 
 str floor_texture = "CEIL5_2";
 str ceilling_texture = "CEIL5_1";
-str wall_texture = "RROCK11";
+str wall_texture = "STONE2";
 
 int SPAWN_LOC_ID = 0;
 
