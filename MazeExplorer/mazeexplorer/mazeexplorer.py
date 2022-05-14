@@ -79,7 +79,8 @@ class MazeExplorer(VizDoom):
         self.floor_texture = floor_texture
         self.ceilling_texture = ceilling_texture
 
-        self.mazes_path = "/Users/aryakulkarni/Downloads/MazeExplorer/maze_outputs" #mazes_path if mazes_path is not None else tempfile.mkdtemp()
+        self.mazes_path = "/Users/aryakulkarni/Downloads/Generating-Interesting-Maps-in-Doom/MazeExplorer/maze_outputs"
+        #mazes_path if mazes_path is not None else tempfile.mkdtemp()
         # create new maps and corresponding config
         shutil.rmtree(self.mazes_path, ignore_errors=True)
         os.mkdir(self.mazes_path)

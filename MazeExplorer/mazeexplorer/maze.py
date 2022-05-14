@@ -63,6 +63,8 @@ class Maze:
         rows = (rows // 2) * 2 + 1
         columns = (columns // 2) * 2 + 1
 
+        directions = []
+
         if seed is not None:
             np.random.seed(seed)
 
@@ -73,6 +75,9 @@ class Maze:
         maze = Maze(rows, columns)
         maze.set_borders()
 
+        # check if wallpoints are used more than 2 times
+        wall_points = set()
+
         # Make aisles
         for i in range(density):
             x = np.random.random_integers(0, rows // 2) * 2
@@ -81,29 +86,59 @@ class Maze:
 
             for j in range(complexity):
                 neighbours = []
+                direction = []
 
                 if maze.in_maze(x - 2, y):
                     neighbours.append((x - 2, y))
+                    direction.append("L")
 
                 if maze.in_maze(x + 2, y):
                     neighbours.append((x + 2, y))
+                    direction.append("R")
+
 
                 if maze.in_maze(x, y - 2):
                     neighbours.append((x, y - 2))
+                    direction.append("U")
+
 
                 if maze.in_maze(x, y + 2):
                     neighbours.append((x, y + 2))
+                    direction.append("D")
 
+
+                if maze.in_maze(x + 2, y + 2):
+                    neighbours.append((x + 2, y + 2))
+                    direction.append("UR")
+
+                if maze.in_maze(x - 2, y - 2):
+                    neighbours.append((x - 2, y - 2))
+                    direction.append("LD")
+
+                if maze.in_maze(x - 2, y + 2):
+                    neighbours.append((x - 2, y + 2))
+                    direction.append("LR")
+
+                if maze.in_maze(x + 2, y - 2):
+                    neighbours.append((x + 2, y - 2))
+                    direction.append("UD")
+
+
+                # find neighbors and add specific wall (only 1 wall per point)
+                #print(len(neighbours))
                 if len(neighbours):
-                    next_x, next_y = neighbours[np.random.randint(
-                        0,
-                        len(neighbours) - 1)]
+                    index = np.random.randint(0, len(neighbours) - 1)
+                    next_x, next_y = neighbours[index]
+                    direction_choosen = direction[index]
+                    #print("next X: ", next_x, " next Y: ", next_y, "direction: ", direction_choosen)
 
-                    if not maze.is_wall(next_x, next_y):
+                    if not maze.is_wall(next_x, next_y) and (next_x, next_y) not in wall_points:
                         maze.set_wall(next_x, next_y)
                         maze.set_wall(next_x + (x - next_x) // 2,
                                       next_y + (y - next_y) // 2)
                         x, y = next_x, next_y
+                        wall_points.add((x, y))
+        print(wall_points)
 
         return maze
 
@@ -136,7 +171,7 @@ class Maze:
 
 
 
-def generate_mazes(maze_id, num, rows=9, columns=9, seed=None, complexity=.7, density=.7):
+def generate_mazes(maze_id, num, rows, columns, seed=None, complexity=.7, density=.7):
     """
     args: 
 
@@ -158,9 +193,9 @@ def generate_mazes(maze_id, num, rows=9, columns=9, seed=None, complexity=.7, de
 
         map_seed = random.randint(0, 2147483647)
 
-        # maze = Maze.create_maze(columns + 1, rows + 1, map_seed, complexity=complexity, density=density)
-        # print(maze)
-        maze = Maze.get_maze("/Users/aryakulkarni/Downloads/MazeExplorer/my_maze_inputs/testMap2.txt")
+        #maze = Maze.create_maze(columns + 1, rows + 1, map_seed, complexity=complexity, density=density)
+        #print(maze)
+        maze = Maze.get_maze("/Users/aryakulkarni/Downloads/Generating-Interesting-Maps-in-Doom/MazeExplorer/my_maze_inputs/doomMap_15.txt")
 
         if maze in mazes:
             counter += 1

@@ -2,6 +2,7 @@
 # Licensed under the MIT License
 
 from omg import *
+import random
 
 
 def build_wall(maze, BLOCK_SIZE):
@@ -20,7 +21,7 @@ def build_wall(maze, BLOCK_SIZE):
         x, y = w * BLOCK_SIZE, h * BLOCK_SIZE
         x += int(BLOCK_SIZE / 2)
         y += int(BLOCK_SIZE / 2)
-        things.append(ZThing(*[len(things) + 1000, x, y, 0, 0, 9001, 22279]))
+        things.append(ZThing(*[len(things) + 1000, x, y, 0, 0, 2012, 22279]))
 
     def __add_vertex(w, h):
         if (w, h) in v_indexes:
@@ -72,17 +73,22 @@ def build_wall(maze, BLOCK_SIZE):
 
     # Now connect the walls
     for h, row in enumerate(maze):
-
+        prob = 0.2
+        prob2 = 0.5
         for w, _ in enumerate(row):
             if (w, h) not in v_indexes:
                 __add_start(w, h)
                 continue
+            if random.random() < prob2:
+                if (w + 1, h) in v_indexes:
+                    __add_line((w, h), (w + 1, h))
+            else:
+                if (w, h + 1) in v_indexes:
+                    __add_line((w, h), (w, h + 1))
 
-            if (w + 1, h) in v_indexes:
-                __add_line((w, h), (w + 1, h))
-
-            if (w, h + 1) in v_indexes:
-                __add_line((w, h), (w, h + 1))
+            if random.random() < prob:
+                if (w + 1, h + 1) in v_indexes:
+                    __add_line((w, h), (w + 1, h + 1))
 
     return things, vertexes, linedefs
 

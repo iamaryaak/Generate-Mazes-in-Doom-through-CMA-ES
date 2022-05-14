@@ -1,13 +1,13 @@
-             
- XXXXXXXXXXX 
- XXXXXXXXXXX 
- XXXX XXXXXX 
- XXX XXXXXXX 
- XXXXXXXX X  
- XXXXXXXXXXX 
- XXXXXXX  XX 
- XXXXXXXXXXX 
-   XXXXXXXXX 
- XXXXXXXXXXX 
- XXXXXXXXXXX 
-             
+XXXXXXXXXXXXX
+X     XXX   X
+X   X    XX X
+X    XX    XX
+X   X XX   XX
+X    X X    X
+X   X  X X  X
+X    X    X X
+X    X      X
+X  XX X   X X
+X X X     XXX
+X XX      X X
+XXXXXXXXXXXXX
