@@ -13,17 +13,20 @@ def print_map(board):
 		for c in r:
 			if c == WALL:
 				rowprint = rowprint + "X"
-			elif c == EMPTY:
+			#elif c == EMPTY:
+			else:
 				rowprint = rowprint + " "
-			elif c == HP:
-                                rowprint = rowprint + "H"
+			#elif c == HP:
+                                #rowprint = rowprint + "H"
 			
 		print(rowprint)
 
 print("Implementing CMS-ES to Doom Map Generation")
 WALL = 1
+WALL1 = 3
 EMPTY = 0
 HP = 2
+max_num = 9
 
 ## Create a vector of 5 health pack points and 15 wall points
 # mapVector = [x_health, y_health, ..., x_wall, y_wall, angled]
@@ -32,8 +35,8 @@ mapVector = []
 # find random points for 5 health packs
 ct = 0
 while ct < 5:
-    x = random.randint(1, 13)
-    y = random.randint(1, 13)
+    x = random.randint(1, max_num)
+    y = random.randint(1, max_num)
     mapVector.append(x)
     mapVector.append(y)
     ct = ct + 1
@@ -44,8 +47,8 @@ while ct < 5:
 direction = [0, 1, 0.5] 
 ct = 0
 while ct < 15:
-    x = random.randint(1, 13)
-    y = random.randint(1, 13)
+    x = random.randint(1, max_num)
+    y = random.randint(1, max_num)
     angle = random.randint(0, 1)
     mapVector.append(x)
     mapVector.append(y)
@@ -102,26 +105,23 @@ print("Number of Solutions Found: ", len(solutionsList))
 
 
 ## Now, convert the vector representation into 2D maps (.txt)
-## Maps are size of 15 by 15 (set size)
+## Maps are size of 11 by 11 (set size)
 
-doomMap = [[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]]
-mapCt = 0
-angled = []
+doomMap = [[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]]
+mapCT = 0
+wallCt = 0
 for seq in solutionsList:
+    angled = []
     # set health packs first 5 pairs
     for n in range(len(seq)):
         if n < 10:
@@ -130,22 +130,57 @@ for seq in solutionsList:
             y_health = int(seq[n])
             n = n + 1
             #print((x_health), (y_health))
-            doomMap[(x_health)][(y_health)] = HP
+            if doomMap[(x_health)][(y_health)] != WALL:
+                    doomMap[(x_health)][(y_health)] = HP
         if n < 45:
             x_wall = int(seq[n])
             n = n + 1
             y_wall = int(seq[n])
             n = n + 1
             angle = seq[n]
+            #print(angle)
             angled.append(angle)
             n = n + 1
             #print((x_wall), (y_wall))
             doomMap[(x_wall)][(y_wall)] = WALL
+    # add wall and angle to txt files so we can use them to create .WAD files
+    wallCt = wallCt + 1
+    fileoutput = "my_maze_inputs/wallList_" + str(wallCt) + ".txt"
+    with open(fileoutput, 'w') as f:
+        str1 = " ".join(str(e) for e in angled)
+        f.write(str1)
+        f.close()
+        print(fileoutput, " is created!")
     # check if health pack exists, if it doesn't, add it
     if not any(HP in x for x in doomMap):
-        x = random.randint(1, 13)
-        y = random.randint(1, 13)
-        doomMap[x][y] = HP
+        x = random.randint(1, max_num)
+        y = random.randint(1, max_num)
+        if doomMap[x][y] != WALL:
+                doomMap[x][y] = HP
+        else:
+                while doomMap[x][y] != WALL:
+                        x = random.randint(1, max_num)
+                        y = random.randint(1, max_num)
+                doomMap[x][y] = HP
+        
+    fileoutput = "my_maze_inputs/doomMap_" + str(mapCT) + ".txt"
+    with open(fileoutput, 'w') as f:
+        for row in doomMap:
+            rowprint = ""
+            for c in row:
+                if c == WALL:
+                    rowprint = rowprint + "X"
+                elif c == HP:
+                    rowprint = rowprint + "H"
+                else:
+                    rowprint = rowprint + " "
+            f.write(rowprint)
+            f.write("\n")
+        f.close()
+        print(fileoutput, " is created!")
+    mapCT = mapCT + 1
     print("=====================")
     print_map(doomMap)
     print("=====================")
+
+print("All .txt files have been created")
