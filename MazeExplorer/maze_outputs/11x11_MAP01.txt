@@ -1,11 +1,11 @@
            
- XX      X 
- XXX    XX 
-  XX     X 
-  XXX      
-  XXXX     
-  XX     X 
-      X  X 
-     XX  X 
- XXXXXXXXX 
+        XX 
+ XXX  XXXX 
+  X     XX 
+        XX 
+       XXX 
+  X  XX    
+  XX  X    
+  X  XX  X 
+ XX  XXXXX 
            
