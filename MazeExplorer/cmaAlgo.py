@@ -164,14 +164,15 @@ for seq in solutionsList:
                 doomMap[x][y] = HP
         
     fileoutput = "my_maze_inputs/doomMap_" + str(mapCT) + ".txt"
+    # ignore healthpacks for now...
     with open(fileoutput, 'w') as f:
         for row in doomMap:
             rowprint = ""
             for c in row:
                 if c == WALL:
                     rowprint = rowprint + "X"
-                elif c == HP:
-                    rowprint = rowprint + "H"
+                #elif c == HP:
+                    #rowprint = rowprint + " "
                 else:
                     rowprint = rowprint + " "
             f.write(rowprint)
