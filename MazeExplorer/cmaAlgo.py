@@ -3,23 +3,72 @@ from matplotlib import *
 import cma
 import random
 import os
+from collections import Counter
+import itertools
+
 
 ## Functions
-def print_map(board):
-	# Print the rows
+def change_map(board):
+	mapdm = []
+    # Print the rows
+	print(board)
 	for r in board:
+		tmp = []
 		#print(r)
 		rowprint = ""
 		for c in r:
 			if c == WALL:
 				rowprint = rowprint + "X"
+				tmp.append('X')
+			elif c == HP:
+				rowprint = rowprint + "H"
+				tmp.append('H')
 			#elif c == EMPTY:
 			else:
 				rowprint = rowprint + " "
-			#elif c == HP:
-                                #rowprint = rowprint + "H"
-			
+				tmp.append(' ')
+
+		mapdm.append(tmp)
 		print(rowprint)
+	return mapdm
+        
+
+
+def evaluator(map):
+    count = Counter(list(itertools.chain.from_iterable(map)))
+    print(count)
+    two_walls = [0]
+    visited = map
+
+    def dfs(x, y):
+        if x>= len(map) or x < 0 or y<0 or y>= len(map[0]):
+            return ['N']
+        if map[x][y] == 'H' or visited[x][y] == ' ':
+            visited[x][y] = 'T'
+            
+            res = dfs(x-1,y-1)+dfs(x-1,y)+dfs(x+1,y)+dfs(x-1,y+1)+ dfs(x,y-1)+ dfs(x+1,y-1)+dfs(x+1,y+1)+dfs(x,y+1)
+            counts = Counter(res)
+            if counts['X'] >= 4:
+                two_walls[0] += 1
+
+        return [map[x][y]]
+    x, y = -1, -1
+    for ele in range(len(map)):
+        for element in range(len(map[ele])):
+            if map[ele][element] == ' ':
+                print("calling dfs",ele,element)
+                x, y = ele, element
+                break
+        if x>=0:
+            break
+    dfs(x, y)                 
+    visit = Counter(list(itertools.chain.from_iterable(map)))
+    #print(two_walls[0])
+    score = (visit['T']/(count[' ']+count['H']))*100 + two_walls[0]
+    #print(visit['T']/(count[' ']+count['H'])*100)
+    #print(visited)
+    print("Map Score: ", score)
+    return score
 
 print("Implementing CMS-ES to Doom Map Generation")
 WALL = 1
@@ -31,7 +80,7 @@ max_num = 9
 ## Create a vector of 5 health pack points and 15 wall points
 # mapVector = [x_health, y_health, ..., x_wall, y_wall, angled]
 mapVector = []
-
+theMap = np.zeros((10, 10))
 # find random points for 5 health packs
 ct = 0
 while ct < 5:
@@ -39,6 +88,7 @@ while ct < 5:
     y = random.randint(1, max_num)
     mapVector.append(x)
     mapVector.append(y)
+    theMap[y][x] = 2
     ct = ct + 1
 # add 15 random wall points and direction
 # 0 = up
@@ -53,7 +103,9 @@ while ct < 15:
     mapVector.append(x)
     mapVector.append(y)
     mapVector.append(angle)
+    theMap[y][x] = 1
     ct = ct + 1
+
 
 ## Standardize the vector
 # zi = (xi – min(x)) / (max(x) – min(x))
@@ -65,6 +117,7 @@ for n in mapVector:
     deno = maxVectorValue - minVectorValue
     ans = num / deno
     standardVector.append(ans)
+
 print("=========================== STANDARDIZED VECTOR ===========================")
 print(standardVector)
 print("Number of points: ", len(standardVector))
@@ -109,7 +162,7 @@ print("Number of Solutions Found: ", len(solutionsList))
 
 doomMap = [[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
 		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+        [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
 		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
 		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
 		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
@@ -145,12 +198,12 @@ for seq in solutionsList:
             doomMap[(x_wall)][(y_wall)] = WALL
     # add wall and angle to txt files so we can use them to create .WAD files
     wallCt = wallCt + 1
-    fileoutput = "my_maze_inputs/wallList_" + str(wallCt) + ".txt"
-    with open(fileoutput, 'w') as f:
-        str1 = " ".join(str(e) for e in angled)
-        f.write(str1)
-        f.close()
-        print(fileoutput, " is created!")
+    # fileoutput = "my_maze_inputs/wallList_" + str(wallCt) + ".txt"
+    # with open(fileoutput, 'w') as f:
+    #     str1 = " ".join(str(e) for e in angled)
+    #     f.write(str1)
+    #     f.close()
+    #     print(fileoutput, " is created!")
     # check if health pack exists, if it doesn't, add it
     if not any(HP in x for x in doomMap):
         x = random.randint(1, max_num)
@@ -162,26 +215,32 @@ for seq in solutionsList:
                         x = random.randint(1, max_num)
                         y = random.randint(1, max_num)
                 doomMap[x][y] = HP
-        
-    fileoutput = "my_maze_inputs/doomMap_" + str(mapCT) + ".txt"
-    # ignore healthpacks for now...
-    with open(fileoutput, 'w') as f:
-        for row in doomMap:
-            rowprint = ""
-            for c in row:
-                if c == WALL:
-                    rowprint = rowprint + "X"
-                #elif c == HP:
-                    #rowprint = rowprint + " "
-                else:
-                    rowprint = rowprint + " "
-            f.write(rowprint)
-            f.write("\n")
-        f.close()
-        print(fileoutput, " is created!")
-    mapCT = mapCT + 1
     print("=====================")
-    print_map(doomMap)
+    mapV = change_map(doomMap)
+    print(evaluator(mapV))
     print("=====================")
+#     fileoutput = "my_maze_inputs/doomMap_" + str(mapCT) + ".txt"
+#     # ignore healthpacks for now...
+#     with open(fileoutput, 'w') as f:
+#         for row in doomMap:
+#             rowprint = ""
+#             for c in row:
+#                 if c == WALL:
+#                     rowprint = rowprint + "X"
+#                 #elif c == HP:
+#                     #rowprint = rowprint + " "
+#                 else:
+#                     rowprint = rowprint + " "
+#             f.write(rowprint)
+#             f.write("\n")
+#         f.close()
+#         print(fileoutput, " is created!")
+#     mapCT = mapCT + 1
+    # print("=====================")
+    # print_map(doomMap)
+    # print(evaluator(doomMap))
+    # print("=====================")
 
-print("All .txt files have been created")
+# print("All .txt files have been created")
+
+
