@@ -36,6 +36,10 @@ def change_map(board):
 
 def evaluator(map):
     count = Counter(list(itertools.chain.from_iterable(map)))
+    if ' ' not in count:
+        return 0
+    if 'H' not in count:
+        count['H'] = 0
     print(count)
     two_walls = [0]
     visited = map
@@ -63,6 +67,10 @@ def evaluator(map):
             break
     dfs(x, y)                 
     visit = Counter(list(itertools.chain.from_iterable(map)))
+    if ' ' not in visit:
+        return 0
+    if 'H' not in count:
+        count['H'] = 0
     #print(two_walls[0])
     score = (visit['T']/(count[' ']+count['H']))*100 + two_walls[0]
     #print(visit['T']/(count[' ']+count['H'])*100)
