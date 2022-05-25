@@ -119,6 +119,10 @@ def undoNormalize(solutions, maxVectorValue, minVectorValue):
 
 def evaluator(map):
     count = Counter(list(itertools.chain.from_iterable(map)))
+    if ' ' not in count:
+        return 0
+    if 'H' not in count:
+        count['H'] = 0
     print(count)
     two_walls = [0]
     visited = map
