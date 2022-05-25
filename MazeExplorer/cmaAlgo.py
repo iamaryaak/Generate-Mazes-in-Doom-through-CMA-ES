@@ -1,3 +1,4 @@
+from operator import itemgetter
 import numpy as np
 from matplotlib import *
 import cma
@@ -5,6 +6,23 @@ import random
 import os
 from collections import Counter
 import itertools
+
+WALL = 1
+WALL1 = 3
+EMPTY = 0
+HP = 2
+max_num = 9
+doomMap = [[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
+		[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]]
 
 
 ## Functions
@@ -32,14 +50,75 @@ def change_map(board):
 		print(rowprint)
 	return mapdm
         
+def vector2map(seq):
+    temp = doomMap
+    #print(len(seq))
+    for n in range(len(seq)):
+        if n < 10:
+            #print("HEALTH PACK")
+            x_health = int(seq[n])
+            n = n + 1
+            #print(n)
+            y_health = int(seq[n])
+            n = n + 1
+            #print(n)
+            # check for out of range
+            if temp[(x_health)][(y_health)] != WALL:
+                    temp[(x_health)][(y_health)] = HP
+        if n < 45 and n > 9:
+            #print("WALL")
+            x_wall = int(seq[n])
+            n = n + 1
+            #print(n)
+            y_wall = int(seq[n])
+            n = n + 1
+            #print(n)
+            angle = seq[n]
+            n = n + 1
+            #print(n)
+            temp[(x_wall)][(y_wall)] = WALL
+    # add wall and angle to txt files so we can use them to create .WAD files
+    # wallCt = wallCt + 1
+    # fileoutput = "my_maze_inputs/wallList_" + str(wallCt) + ".txt"
+    # with open(fileoutput, 'w') as f:
+    #     str1 = " ".join(str(e) for e in angled)
+    #     f.write(str1)
+    #     f.close()
+    #     print(fileoutput, " is created!")
+    # check if health pack exists, if it doesn't, add it
+    if not any(HP in x for x in temp):
+        x = random.randint(1, max_num)
+        y = random.randint(1, max_num)
+        if temp[x][y] != WALL:
+                temp[x][y] = HP
+        else:
+                while temp[x][y] != WALL:
+                        x = random.randint(1, max_num)
+                        y = random.randint(1, max_num)
+                temp[x][y] = HP 
+    return temp
+
+def undoNormalize(solutions, maxVectorValue, minVectorValue):
+        #print("+++++ UNDO NORM +++++")
+        #print("Min and Max\n", minVectorValue, " " ,maxVectorValue)
+        # x1 = (zi * (max(x) - min(x))) + min(x)
+        solutionsNormal = []
+        for seq in solutions:
+                print(seq)
+                seqNorm = []
+                for n in seq:
+                        #print(n)
+                        res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
+                        seqNorm.append(res)
+                solutionsNormal.append(seqNorm)
+        # check solution to see if it is unnormalized correctly
+        #print("Result - undo normalize:") 
+        
+        return solutionsNormal
 
 
 def evaluator(map):
     count = Counter(list(itertools.chain.from_iterable(map)))
-    if ' ' not in count:
-        return 0
-    if 'H' not in count:
-        count['H'] = 0
     print(count)
     two_walls = [0]
     visited = map
@@ -74,13 +153,165 @@ def evaluator(map):
     print("Map Score: ", score)
     return score
 
-print("Implementing CMS-ES to Doom Map Generation")
-WALL = 1
-WALL1 = 3
-EMPTY = 0
-HP = 2
-max_num = 9
+def toSolutionNormal(child, minVectorValue, maxVectorValue):
+    solutionsNormal = []
+    for n in child:
+        #res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
+        num = n - minVectorValue # (xi - min(x))
+        deno = maxVectorValue - minVectorValue # (max(x) - min(x))
+        res = num / deno # zi
+        solutionsNormal.append(res)
+    return solutionsNormal
+    
+def toSolutionList(solutionsNormal):
+    #print(solutionsNormal)
+    solutionsList = [] 
+    for n in solutionsNormal:
+        #print(type(n), n)
+                for s in n:
+                        num = round(s, 2)
+                        solutionsList.append(num)
+    return solutionsList
 
+def selection(maps):
+    return maps[0:5]
+
+def evolution(mapVector):
+    ## Standardize the vector
+    # zi = (xi – min(x)) / (max(x) – min(x))
+    standardVector = []
+    minVectorValue = min(mapVector)
+    maxVectorValue = max(mapVector)
+    for n in mapVector:
+        num = n - minVectorValue # (xi - min(x))
+        deno = maxVectorValue - minVectorValue # (max(x) - min(x))
+        ans = num / deno # zi
+        standardVector.append(ans)
+
+    print("=========================== STANDARDIZED VECTOR ===========================")
+    print(standardVector)
+    print("Number of points: ", len(standardVector))
+
+    # use CMA-ES
+    x0 = standardVector  # initial solution
+    sigma0 = 0.01 # std deviation
+
+    # x = best evaluated values
+    # es = the cma.CMAEvolutionStrategy class instance used to run the optimization.
+    es = cma.CMAEvolutionStrategy(x0, sigma0)
+    #print("=========================== MAP VECTOR ===========================")
+    solutions = es.ask()
+    #print(solutions)
+
+    # xi = (zi * (max(x) - min(x))) + min(x)
+    solutionsNormal = []
+    for seq in solutions:
+        seqNormal = []
+        for n in seq:
+            # xi = (zi * (max(x) - min(x))) + min(x)
+            res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
+            seqNormal.append(res)
+        solutionsNormal.append(seqNormal)
+    
+
+    #print("=========================== SOLUTIONS ===========================")
+    #for s in solutionsNormal:
+    #    print(s)
+
+    #solutionsList = toSolutionList(solutionsNormal)
+    solutionsList = [] 
+    for s in solutionsNormal:
+        sol = []
+        for n in s:
+            num = round(n, 2)
+            sol.append(num)
+        solutionsList.append(sol)
+
+    #print(solutionsList)
+    print("Number of Solutions Found: ", len(solutionsList))
+
+    ## Now, convert the vector representation into 2D maps (.txt)
+    ## Maps are size of 11 by 11 (set size)
+    mapCT = 0
+    wallCt = 0
+    mapList = []
+    maps=[]
+
+    for seq in solutionsList:
+        temp_map = doomMap
+        print(seq)
+        angled = []
+        # set health packs first 5 pairs
+        temp_map = vector2map(seq)
+        mapList += temp_map
+        mapV = change_map(temp_map)
+        maps.append([seq, evaluator(mapV)])
+    maps = sorted(maps, key=itemgetter(1))
+    maps.reverse()
+    print("=====================") 
+
+    selected_children = selection(maps)
+
+    #print(selected_children)
+    #=================================================================================
+    # We have done CMA for the first round, and we go loop on the next few generations
+    print("start generation")
+    generation = 3
+    generation_count = 0
+    while generation_count < generation:
+        solutionsList = []
+
+        for child in selected_children:
+            minVec = min(child[0])
+            maxVec = max(child[0])
+            #print("Min and Max\n", minVec, " " ,maxVec)
+            solutionsNormal = toSolutionNormal(child[0], minVec, maxVec)
+            es = cma.CMAEvolutionStrategy(solutionsNormal, sigma0)
+            solutions = es.ask()
+            #print("Solutions generated: ", solutions)
+            unNorm = undoNormalize(solutions, maxVec, minVec)
+            current_solutions = toSolutionList(unNorm)
+            solutionsList.append(current_solutions)
+        
+        maps=[]
+        for child in solutionsList:
+            temp_map = doomMap
+            print(temp_map)
+            angled = []
+            #print(child)
+            temp_map = vector2map(child)
+            mapV = change_map(temp_map)
+            maps.append([seq, evaluator(mapV)])
+        
+        maps = sorted(maps, key=itemgetter(1))
+        maps.reverse()
+        #do selection
+        selected_children = selection(maps) 
+        generation_count += 1
+
+    #Final result
+    print("=========================== MAP VECTOR ===========================")
+    print(selected_children)
+    print(len(selected_children))
+
+    solutionsList = []
+    for child in selected_children:
+        seq = child[0]
+        solutionsList.append(seq)
+    
+    print("=========================== SOLUTIONS ===========================")
+    print("Number of Solutions Found: ", len(solutionsList))
+    print("Number of Generations: ", generation)
+     
+    for seq in solutionsList:
+        print(seq)
+        temp_map = vector2map(seq)
+        mapV = change_map(temp_map)
+        print(evaluator(mapV))
+        print("=====================") 
+
+
+print("Implementing CMS-ES to Doom Map Generation")
 ## Create a vector of 5 health pack points and 15 wall points
 # mapVector = [x_health, y_health, ..., x_wall, y_wall, angled]
 mapVector = []
@@ -110,150 +341,4 @@ while ct < 15:
     theMap[y][x] = 1
     ct = ct + 1
 
-
-## Standardize the vector
-# zi = (xi – min(x)) / (max(x) – min(x))
-standardVector = []
-minVectorValue = min(mapVector)
-maxVectorValue = max(mapVector)
-for n in mapVector:
-    num = n - minVectorValue
-    deno = maxVectorValue - minVectorValue
-    ans = num / deno
-    standardVector.append(ans)
-
-print("=========================== STANDARDIZED VECTOR ===========================")
-print(standardVector)
-print("Number of points: ", len(standardVector))
-
-# use CMA-ES
-x0 = standardVector  # initial solution
-sigma0 = 0.01 # std deviation
-
-# x = best evaluated values
-# es = the cma.CMAEvolutionStrategy class instance used to run the optimization.
-es = cma.CMAEvolutionStrategy(x0, sigma0)
-print("=========================== MAP VECTOR ===========================")
-solutions = es.ask()
-print(solutions)
-
-# x1 = (zi * (max(x) - min(x))) + min(x)
-solutionsNormal = []
-for seq in solutions:
-    seqNormal = []
-    for n in seq:
-        res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
-        seqNormal.append(res)
-    solutionsNormal.append(seqNormal)
-
-print("=========================== SOLUTIONS ===========================")
-#for s in solutionsNormal:
-    #print(s)
-
-solutionsList = []
-for s in solutionsNormal:
-    sol = []
-    for n in s:
-        num = round(n, 2)
-        sol.append(num)
-    solutionsList.append(sol)
-#print(solutionsList)
-print("Number of Solutions Found: ", len(solutionsList))
-
-
-## Now, convert the vector representation into 2D maps (.txt)
-## Maps are size of 11 by 11 (set size)
-
-doomMap = [[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]]
-mapCT = 0
-wallCt = 0
-for seq in solutionsList:
-    angled = []
-    doomMap = [[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-                [WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL],
-		[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]]
-    # set health packs first 5 pairs
-    for n in range(len(seq)):
-        if n < 10:
-            x_health = int(seq[n])
-            n = n + 1
-            y_health = int(seq[n])
-            n = n + 1
-            #print((x_health), (y_health))
-            if doomMap[(x_health)][(y_health)] != WALL:
-                    doomMap[(x_health)][(y_health)] = HP
-        if n < 45:
-            x_wall = int(seq[n])
-            n = n + 1
-            y_wall = int(seq[n])
-            n = n + 1
-            angle = seq[n]
-            #print(angle)
-            angled.append(angle)
-            n = n + 1
-            #print((x_wall), (y_wall))
-            doomMap[(x_wall)][(y_wall)] = WALL
-    # add wall and angle to txt files so we can use them to create .WAD files
-    wallCt = wallCt + 1
-    # fileoutput = "my_maze_inputs/wallList_" + str(wallCt) + ".txt"
-    # with open(fileoutput, 'w') as f:
-    #     str1 = " ".join(str(e) for e in angled)
-    #     f.write(str1)
-    #     f.close()
-    #     print(fileoutput, " is created!")
-    # check if health pack exists, if it doesn't, add it
-    if not any(HP in x for x in doomMap):
-        x = random.randint(1, max_num)
-        y = random.randint(1, max_num)
-        if doomMap[x][y] != WALL:
-                doomMap[x][y] = HP
-        else:
-                while doomMap[x][y] != WALL:
-                        x = random.randint(1, max_num)
-                        y = random.randint(1, max_num)
-                doomMap[x][y] = HP
-    print("=====================")
-    mapV = change_map(doomMap)
-    print(evaluator(mapV))
-    print("=====================")
-#     fileoutput = "my_maze_inputs/doomMap_" + str(mapCT) + ".txt"
-#     # ignore healthpacks for now...
-#     with open(fileoutput, 'w') as f:
-#         for row in doomMap:
-#             rowprint = ""
-#             for c in row:
-#                 if c == WALL:
-#                     rowprint = rowprint + "X"
-#                 #elif c == HP:
-#                     #rowprint = rowprint + " "
-#                 else:
-#                     rowprint = rowprint + " "
-#             f.write(rowprint)
-#             f.write("\n")
-#         f.close()
-#         print(fileoutput, " is created!")
-#     mapCT = mapCT + 1
-    # print("=====================")
-    # print_map(doomMap)
-    # print(evaluator(doomMap))
-    # print("=====================")
-
-# print("All .txt files have been created")
+evolution(mapVector)
