@@ -1,3 +1,4 @@
+from operator import itemgetter
 import numpy as np
 from matplotlib import *
 import cma
@@ -148,12 +149,8 @@ def toSolutionList(solutionsNormal):
         solutionsList.append(sol)
     return solutionsList
 
-#TODO
-## mapSolution is the 2d array of numbers (with WALL 1, EMPTY 0...)
-## mapList is the real map we can evaluate
-def selection(mapSolutions, mapList):
-
-    return 0
+def selection(maps):
+    return maps[0:5]
 
 def evolution(mapVector):
     ## Standardize the vector
@@ -216,16 +213,18 @@ def evolution(mapVector):
     mapCT = 0
     wallCt = 0
     mapList = []
+    maps=[]
     for seq in solutionsList:
         angled = []
         # set health packs first 5 pairs
         temp_map = vector2map(seq, angled)
         mapList += temp_map
         mapV = change_map(temp_map)
-        print(evaluator(mapV))
-        print("=====================")    
+        maps.append([seq, evaluator(mapV)])
+    maps = sorted(maps, key=itemgetter(1))
+    print("=====================") 
     
-    selected_children = selection()
+    selected_children = selection(maps)
 
     #=================================================================================
     # We have done CMA for the first round, and we go loop on the next few generations
@@ -242,13 +241,16 @@ def evolution(mapVector):
         
         solutionsNormal = toSolutionNormal(selected_children, minVectorValue, maxVectorValue)
         solutionsList = toSolutionList(solutionsNormal)
-           
-        for child in solutions:
+        
+        maps=[]
+        for child in solutionsList:
             temp_map = vector2map(child)
-            current_children_map += temp_map
-
+            mapV = change_map(temp_map)
+            maps.append([seq, evaluator(mapV)])
+        
+        maps = sorted(maps, key=itemgetter(1))
         #do selection
-        selected_children = selection(solutionsList, current_children_map) 
+        selected_children = selection(maps) 
         generation_count += 1
 
     #Final result
