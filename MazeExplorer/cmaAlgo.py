@@ -151,7 +151,7 @@ def evaluator(map):
     dfs(x, y)                 
     visit = Counter(list(itertools.chain.from_iterable(map)))
     #print(two_walls[0])
-    score = (visit['T']/(count[' ']+count['H']))*100 + two_walls[0]
+    score = ((visit['T']/(count[' ']+count['H']))*100 + (two_walls[0]/count[' '])*100)/2
     #print(visit['T']/(count[' ']+count['H'])*100)
     #print(visited)
     print("Map Score: ", score)
