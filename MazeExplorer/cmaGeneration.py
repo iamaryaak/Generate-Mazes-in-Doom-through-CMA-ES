@@ -180,7 +180,7 @@ def evolution(mapVector):
     #print(solutions)
 
     # x1 = (zi * (max(x) - min(x))) + min(x)
-    solutionsNormal = toSolutionNormal(solutions)
+    solutionsNormal = toSolutionNormal(solutions, minVectorValue, maxVectorValue)
     '''
     solutionsNormal = []
     for seq in solutions:
@@ -214,6 +214,7 @@ def evolution(mapVector):
     wallCt = 0
     mapList = []
     maps=[]
+
     for seq in solutionsList:
         angled = []
         # set health packs first 5 pairs
@@ -223,28 +224,31 @@ def evolution(mapVector):
         maps.append([seq, evaluator(mapV)])
     maps = sorted(maps, key=itemgetter(1))
     print("=====================") 
-    
-    selected_children = selection(maps)
 
+    selected_children = selection(maps)
+    print(selected_children)
     #=================================================================================
     # We have done CMA for the first round, and we go loop on the next few generations
     generation = 3
     generation_count = 0
     while generation_count < generation:
         current_children_solutions = []
-        current_children_map = []    
+        current_seq = []    
 
         for child in selected_children:
-            es = cma.CMAEvolutionStrategy(child, sigma0)
+            seq = child[0]
+            es = cma.CMAEvolutionStrategy(seq, sigma0)
             solutions = es.ask()
             current_children_solutions += solutions
-        
-        solutionsNormal = toSolutionNormal(selected_children, minVectorValue, maxVectorValue)
+            current_seq += seq
+            
+        solutionsNormal = toSolutionNormal(current_children_solutions, minVectorValue, maxVectorValue)
         solutionsList = toSolutionList(solutionsNormal)
         
         maps=[]
         for child in solutionsList:
-            temp_map = vector2map(child)
+            angled = []
+            temp_map = vector2map(child, angled)
             mapV = change_map(temp_map)
             maps.append([seq, evaluator(mapV)])
         
@@ -257,7 +261,12 @@ def evolution(mapVector):
     print("=========================== MAP VECTOR ===========================")
     print(selected_children)
 
-    solutionsNormal = toSolutionNormal(selected_children, minVectorValue, maxVectorValue) 
+    current_seq = []
+    for child in selected_children:
+        seq = child[0]
+        current_seq += seq
+
+    solutionsNormal = toSolutionNormal(current_seq, minVectorValue, maxVectorValue) 
     solutionsList = toSolutionList(solutionsNormal)
 
     print("=========================== SOLUTIONS ===========================")
