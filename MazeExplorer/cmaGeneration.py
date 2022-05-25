@@ -58,7 +58,6 @@ def vector2map(seq, angled):
             n = n + 1
             y_health = int(seq[n])
             n = n + 1
-            #print((x_health), (y_health))
             if temp[(x_health)][(y_health)] != WALL:
                     temp[(x_health)][(y_health)] = HP
         if n < 45:
@@ -129,24 +128,19 @@ def evaluator(map):
     print("Map Score: ", score)
     return score
 
-def toSolutionNormal(selected_children, minVectorValue, maxVectorValue):
+def toSolutionNormal(child, minVectorValue, maxVectorValue):
     solutionsNormal = []
-    for seq in selected_children:
-        seqNormal = []
-        for n in seq:
-            res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
-            seqNormal.append(res)
-        solutionsNormal.append(seqNormal)
+    for n in child:
+        res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
+        solutionsNormal.append(res)
     return solutionsNormal
     
 def toSolutionList(solutionsNormal):
+    print(solutionsNormal)
     solutionsList = [] 
-    for s in solutionsNormal:
-        sol = []
-        for n in s:
-            num = round(n, 2)
-            sol.append(num)
-        solutionsList.append(sol)
+    for n in solutionsNormal:
+        num = round(n, 2)
+        solutionsList.append(num)
     return solutionsList
 
 def selection(maps):
@@ -180,8 +174,6 @@ def evolution(mapVector):
     #print(solutions)
 
     # x1 = (zi * (max(x) - min(x))) + min(x)
-    solutionsNormal = toSolutionNormal(solutions, minVectorValue, maxVectorValue)
-    '''
     solutionsNormal = []
     for seq in solutions:
         seqNormal = []
@@ -189,14 +181,13 @@ def evolution(mapVector):
             res = (n * (maxVectorValue - minVectorValue)) + minVectorValue
             seqNormal.append(res)
         solutionsNormal.append(seqNormal)
-    '''
+    
 
     #print("=========================== SOLUTIONS ===========================")
     #for s in solutionsNormal:
     #    print(s)
 
-    solutionsList = toSolutionList(solutionsNormal)
-    '''
+    #solutionsList = toSolutionList(solutionsNormal)
     solutionsList = [] 
     for s in solutionsNormal:
         sol = []
@@ -204,7 +195,7 @@ def evolution(mapVector):
             num = round(n, 2)
             sol.append(num)
         solutionsList.append(sol)
-    '''
+
     #print(solutionsList)
     print("Number of Solutions Found: ", len(solutionsList))
 
@@ -216,6 +207,7 @@ def evolution(mapVector):
     maps=[]
 
     for seq in solutionsList:
+        print(seq)
         angled = []
         # set health packs first 5 pairs
         temp_map = vector2map(seq, angled)
@@ -226,28 +218,28 @@ def evolution(mapVector):
     print("=====================") 
 
     selected_children = selection(maps)
-    print(selected_children)
+
+    #print(selected_children)
     #=================================================================================
     # We have done CMA for the first round, and we go loop on the next few generations
+    print("start generation")
     generation = 3
     generation_count = 0
     while generation_count < generation:
-        current_children_solutions = []
-        current_seq = []    
+        solutionsList = []
 
         for child in selected_children:
-            seq = child[0]
-            es = cma.CMAEvolutionStrategy(seq, sigma0)
+            solutionsNormal = toSolutionNormal(child[0], min(child[0]), max(child[0]))
+            es = cma.CMAEvolutionStrategy(solutionsNormal, sigma0)
             solutions = es.ask()
-            current_children_solutions += solutions
-            current_seq += seq
-            
-        solutionsNormal = toSolutionNormal(current_children_solutions, minVectorValue, maxVectorValue)
-        solutionsList = toSolutionList(solutionsNormal)
+            current_solutions = toSolutionList(solutionsNormal)
+            solutionsList.append(current_solutions)
         
+        print(len(solutionsList))
         maps=[]
         for child in solutionsList:
             angled = []
+            print(child)
             temp_map = vector2map(child, angled)
             mapV = change_map(temp_map)
             maps.append([seq, evaluator(mapV)])
@@ -261,14 +253,12 @@ def evolution(mapVector):
     print("=========================== MAP VECTOR ===========================")
     print(selected_children)
 
-    current_seq = []
+    solutionsList = []
     for child in selected_children:
         seq = child[0]
-        current_seq += seq
-
-    solutionsNormal = toSolutionNormal(current_seq, minVectorValue, maxVectorValue) 
-    solutionsList = toSolutionList(solutionsNormal)
-
+        angled = []
+        solutionsList += vector2map(seq,angled)
+    
     print("=========================== SOLUTIONS ===========================")
     print("Number of Solutions Found: ", len(solutionsList))
      
