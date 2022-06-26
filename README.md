@@ -16,4 +16,8 @@ b. Replace ~/MazeExplorer/mazeexplorer/mazeexploreer.py with attached file (chan
 
 
 ### Evolutionary Algorithm: CMA-ES
-We create a Vector of random points for the healthpacks (5) and random points for the wall verticies (15 points) and send that vector through CMA-ES to return multiple new vectors. 
+We create a Vector of random points for the healthpacks (5) and random points for the wall verticies (15 points) and send that vector through CMA-ES to return multiple new map vectors. Each map was evaluated using a pre-trained agent that traveled through the map and determined how well it played.
+
+### DEMO
+
+![Demo Vid](/assets/ezgif.com-gif-maker.gif)
